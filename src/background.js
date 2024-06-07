@@ -6,12 +6,13 @@
 // See https://developer.chrome.com/extensions/background_pages
 
 
-let urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/modules\/([\w-]+)\/.*/;
+// let urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/modules\/([\w-]+)\/.*/;
+const urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/(modules|paths)\/.*/;
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && urlRegex.test(tab.url)) {
     console.log('Sending message to tab');
-    chrome.tabs.sendMessage(tabId, { message: 'startTimer' });
+    chrome.tabs.sendMessage(tabId, { message: 'startMain' });
   }
 });
 
@@ -52,5 +53,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.message === 'Error in fill_quiz_form') {
     console.log('Error in fill_quiz_form');
     createNotification("Error in fill_quiz_form");
+  } else if (request.message === 'new module started'){
+    console.log('New module started');
+    createNotification("New module started");
   }
 });

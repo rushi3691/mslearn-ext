@@ -32,18 +32,14 @@ console.log(
 let timer = null;
 let clicktimer = null;
 
-// function sendMsg(msg) {
-//   chrome.runtime.sendMessage({ message: msg });
-// }
 
 async function startTimer() {
-
   // if url contains #completion, then return
-  if (window.location.href.includes('#completion')) {
-    sendMsg('module completed')
-    console.log('Completion found');
-    return;
-  }
+  // if (window.location.href.includes('#completion')) {
+  //   sendMsg('module completed')
+  //   console.log('Completion found');
+  //   return;
+  // }
 
 
   // #unit-inner-section > h1
@@ -61,12 +57,10 @@ async function startTimer() {
     else if (title.includes('exercise')) {
       sendMsg('exercise found');
       console.log('Exercise found');
-      // return;
     }
     else if (title.includes('knowledge')) {
       sendMsg('knowledge found');
       console.log('Knowledge found');
-      // return;
     }
   }
 
@@ -85,8 +79,6 @@ async function startTimer() {
   const time = metadata.innerHTML.split(' ')[0];
   console.log(time);
   let timeInSeconds = parseInt(time) * 60;
-
-  // let timeInSeconds = 2; // 10 seconds for testing
 
   //click add additional time randomly between 1min to 2min in seconds
   const randomExtraTimeInSeconds = Math.floor(Math.random() * 60) + 60;
@@ -164,8 +156,102 @@ async function startTimer() {
   return timeInSeconds;
 }
 
+function getPageType() {
+  // https://learn.microsoft.com/en-us/training/paths/azure-fundamentals-describe-azure-architecture-services/
+  const urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/(modules|paths)\/([\w-]+)\/$/;
+  const url = window.location.href;
+  const match = url.match(urlRegex);
+  console.log(match);
+  // if match then return start page
+  if (match) {
+    return 'start';
+  }
+  // if #completion then return completion page
+  if (url.includes('#completion')) {
+    return 'completion';
+  }
+  // if #exercise then return exercise page
+  if (url.includes('#exercise')) {
+    return 'exercise';
+  }
+  // if #knowledge then return knowledge page
+  if (url.includes('#knowledge')) {
+    return 'knowledge';
+  }
+  // if #quiz then return quiz page
+  // if (url.includes('#quiz')) {
+  //   return 'quiz';
+  // }
+  // if #module then return module page
+  // if (url.includes('#module')) {
+  //   return 'module';
+  // }
+
+}
+
+function handleStartPage(){
+  sendMsg('new module started');
+  // #start-path or #start-unit
+  const timer = new WorkerInterval(() => {
+    const startPathButton = document.querySelector('#start-path');
+    if (startPathButton !== null) {
+      console.log('Start path button found');
+      startPathButton.click();
+      timer.stop();
+    }
+    const startUnitButton = document.querySelector('#start-unit');
+    if (startUnitButton !== null) {
+      console.log('Start unit button found');
+      startUnitButton.click();
+      timer.stop();
+    }
+
+  }, 1000);
+}
+
+function handleCompletionPage(){
+
+  sendMsg('module completed');
+
+  // #next-unit-link
+  const timer = new WorkerInterval(() => {
+    const continueButton = document.querySelector('#next-unit-link');
+
+    if (continueButton !== null) {
+      console.log('Continue button found');
+      // until dom changes, keep clicking the button  
+      continueButton.click();
+      // timer.stop();
+    }
+  }, 1000);
+
+  window.addEventListener('beforeunload', () => {
+    console.log("Unloading page")
+    timer.stop();
+  });
+}
+
+
+async function main(){
+  // type of pages: module start, normal page can contain exercise, knowledge, quiz, completion page with next button
+
+  const page_type = getPageType();
+  console.log('Page type:', page_type);
+  if(page_type === 'start'){
+    handleStartPage();
+  }
+  else if(page_type === 'completion'){
+    handleCompletionPage();
+  }
+  else{
+    startTimer();
+  }
+
+}
+
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  if (request.message === 'startTimer') {
+  if (request.message === 'startMain') {
     console.log('Starting timer');
     if (timer !== null) {
       console.log('Clearing timer');
@@ -174,7 +260,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       clearInterval(clicktimer);
       timer = null;
     }
-    await startTimer();
+    await main();
   }
 });
 
