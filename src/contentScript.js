@@ -77,17 +77,17 @@ async function startTimer() {
   console.log(metadata.innerHTML); // "2 minutes"
   // parse the time
   const time = metadata.innerHTML.split(' ')[0];
-  console.log(time);
   let timeInSeconds = parseInt(time) * 60;
+  console.log("parsed time: ", timeInSeconds);
 
-  //click add additional time randomly between 1min to 2min in seconds
-  const randomExtraTimeInSeconds = Math.floor(Math.random() * 60) + 60;
+  //click add additional time randomly between 0 to 70 seconds
+  const randomExtraTimeInSeconds = Math.floor(Math.random() * 70);
   timeInSeconds += randomExtraTimeInSeconds;
 
   // 10 seconds for testing
   // timeInSeconds = 10;
 
-  console.log(timeInSeconds);
+  console.log("total time: ", timeInSeconds, " seconds");
 
   // Create a new HTML element and set its text to the time
   const timeElement = document.createElement('div');
@@ -119,10 +119,10 @@ async function startTimer() {
     let currentTime = performance.now() / 1000; // Get the current time in seconds
     let remainingTime = endTime - currentTime; // Calculate the remaining time
 
-    console.log('Time left:', remainingTime); // Log the time left
+    // console.log('Time left:', remainingTime); // Log the time left
 
     timeElement.innerHTML = `Extra time: ${Math.floor(randomExtraTimeInSeconds / 60)} minutes ${randomExtraTimeInSeconds % 60} seconds <br> 
-    Time: ${Math.max(0, Math.floor(remainingTime / 60))} minutes ${Math.max(0, Math.floor(remainingTime % 60))} seconds`; 
+    Time: ${Math.max(0, Math.floor(remainingTime / 60))} minutes ${Math.max(0, Math.floor(remainingTime % 60))} seconds`;
 
     // When the timer ends, show a notification and clear the timer
     if (remainingTime <= 0) {
@@ -161,7 +161,7 @@ function getPageType() {
   const urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/(modules|paths)\/([\w-]+)\/$/;
   const url = window.location.href;
   const match = url.match(urlRegex);
-  console.log(match);
+  // console.log(match);
   // if match then return start page
   if (match) {
     return 'start';
@@ -189,7 +189,7 @@ function getPageType() {
 
 }
 
-function handleStartPage(){
+function handleStartPage() {
   sendMsg('new module started');
   // #start-path or #start-unit
   const timer = new WorkerInterval(() => {
@@ -209,7 +209,7 @@ function handleStartPage(){
   }, 1000);
 }
 
-function handleCompletionPage(){
+function handleCompletionPage() {
 
   sendMsg('module completed');
 
@@ -232,18 +232,80 @@ function handleCompletionPage(){
 }
 
 
-async function main(){
+
+const default_state = { auto_start: false, auto_continue: false };
+
+async function getState(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(key, function (result) {
+      if (chrome.runtime.lastError) {
+        // Reject the promise with the last error
+        reject(chrome.runtime.lastError);
+      } else {
+        if (result[key] === undefined) {
+          console.log('State not found');
+          console.log('Creating state:', default_state);
+          // State not found, create it
+          chrome.storage.local.set({ [key]: default_state }, function () {
+            if (chrome.runtime.lastError) {
+              // Reject the promise with the last error
+              reject(chrome.runtime.lastError);
+            } else {
+              // Resolve the promise with the default state
+              resolve({ ...default_state });
+            }
+          });
+        } else {
+          // Resolve the promise with the result
+          resolve(result[key]);
+        }
+      }
+    });
+  });
+}
+
+
+async function updateState(key, newState) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: newState }, function () {
+      if (chrome.runtime.lastError) {
+        // Reject the promise with the last error
+        reject(chrome.runtime.lastError);
+      } else {
+        // Resolve the promise with the new state
+        resolve(newState);
+      }
+    });
+  });
+}
+
+
+
+async function main() {
   // type of pages: module start, normal page can contain exercise, knowledge, quiz, completion page with next button
+  // console.log("tabId: ", window.tabId)
+  if (window.tabId === undefined) {
+    console.log('Tab id not found');
+    return;
+  }
+  const state = await getState(`${window.tabId}`);
+  console.log('State:', state);
+
+
 
   const page_type = getPageType();
   console.log('Page type:', page_type);
-  if(page_type === 'start'){
-    handleStartPage();
+  if (page_type === 'start') {
+    if (state.auto_start) {
+      handleStartPage();
+    }
   }
-  else if(page_type === 'completion'){
-    handleCompletionPage();
+  else if (page_type === 'completion') {
+    if (state.auto_continue) {
+      handleCompletionPage();
+    }
   }
-  else{
+  else {
     startTimer();
   }
 

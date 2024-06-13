@@ -47,6 +47,14 @@ export async function ask_gemini(text) {
                 ],
             },
             {
+                role: "user",
+                parts: [
+                    { text: "Do not provide incorrect answers." },
+                    { text: "Do not provide explanations." },
+                    { text: "Do not provide additional information." },
+                ],
+            },
+            {
                 role: "model",
                 parts: [
                     { text: "OUTPUT: \nQ1:O1\nQ2:O2\nQ3:O2 \n" },

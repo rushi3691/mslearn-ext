@@ -10,6 +10,14 @@
 const urlRegex = /https:\/\/learn\.microsoft\.com\/([\w-]+)\/training\/(modules|paths)\/.*/;
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    args: [tabId],
+    func: (id) => {
+      window.tabId = id;
+    }
+  });
+
   if (changeInfo.status === 'complete' && urlRegex.test(tab.url)) {
     console.log('Sending message to tab');
     chrome.tabs.sendMessage(tabId, { message: 'startMain' });
@@ -53,8 +61,52 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.message === 'Error in fill_quiz_form') {
     console.log('Error in fill_quiz_form');
     createNotification("Error in fill_quiz_form");
-  } else if (request.message === 'new module started'){
+  } else if (request.message === 'new module started') {
     console.log('New module started');
     createNotification("New module started");
   }
 });
+
+// tab state 
+// `${tab.id}` : {auto_start: false, auto_continue: false}
+
+// chrome.tabs.onCreated.addListener(function (tab) {
+//   let state = { auto_start: false, auto_continue: false };
+//   chrome.storage.local.set({ [tab.id]: state }, function () {
+//     console.log('State initialized for tab ' + tab.id);
+//   });
+// });
+
+// function updateState(tabId, newState) {
+//   chrome.storage.local.set({ [tabId]: newState }, function () {
+//     console.log('State updated for tab ' + tabId);
+//   });
+// }
+
+// function getState(tabId, callback) {
+//   chrome.storage.local.get(String(tabId), function (result) {
+//     callback(result[tabId]);
+//   });
+// }
+
+function setBadgeText(tabId, text) {
+  chrome.action.setBadgeText({ tabId: tabId, text: text });
+}
+
+chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
+  chrome.storage.local.remove(String(tabId), function () {
+    console.log('State removed for tab ' + tabId);
+  });
+});
+
+chrome.action.onClicked.addListener((tab) => {
+  console.log('Action clicked');
+  // change state 
+  chrome.storage.local.get(`${tab.id}`, (result) => {
+    console.log(result);
+    let newState = { auto_start: !result[tab.id].auto_start, auto_continue: !result[tab.id].auto_continue };
+    updateState(tab.id, newState);
+    setBadgeText(tab.id, newState.auto_start ? 'ON' : '');
+  });
+});
+

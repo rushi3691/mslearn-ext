@@ -1,16 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>My Chrome Extension</title>
-    <link rel="stylesheet" href="popup.css" />
-  </head>
-  <body>
-    <div class="app">
-      <p class="title">Microsoft Learn Autocompleter</p>
-      <hr class="divider" />
-      <img class="meme" src="icons/puneet_chai_crop.gif" alt="some meme" height="200"/>
-      <p class="counter-label">For MAQbool!</p>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>My Chrome Extension</title>
+  <link rel="stylesheet" href="popup.css" />
+  <style>
+    .button {
+      background-color: #4CAF50;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      transition-duration: 0.4s;
+    }
+
+    .button:hover {
+      background-color: #45a049;
+    }
+
+    .button.toggled {
+      background-color: #ff6347;
+      /* Tomato */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <p class="title">Microsoft Learn Autocompleter</p>
+    <hr class="divider" />
+    <div style="display: flex; align-items: center;">
+      <h2 style="margin-right: 20px;">auto_start:</h2>
+      <button id="toggle" class="button">auto_start</button>
     </div>
-  </body>
+    <hr class="divider" />
+    <img class="meme" src="icons/puneet_chai_crop.gif" alt="some meme" height="200" />
+    <p class="counter-label">For MAQbool!</p>
+  </div>
+</body>
+
+<script src="popup.js"></script>
+
 </html>
