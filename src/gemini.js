@@ -1,3 +1,7 @@
+// TO get the API key
+// 1. Go to https://aistudio.google.com/app/apikey
+// 2. Click on "Create API Key"
+// 3. Copy the API key and paste it here
 const GEMINI_API_KEY = "AIzaSyC4VDEqhavkybPWfypjq50v5zcXbRLrndY";
 // const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
