@@ -46,6 +46,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/mslearn-ext-${{ steps.package_version.outputs.VERSION }}.zip
+        asset_path: ./release/mslearn-ext-v${{ steps.package_version.outputs.VERSION }}.zip
         asset_name: mslearn-ext-${{ steps.package_version.outputs.VERSION }}.zip
         asset_content_type: application/zip
