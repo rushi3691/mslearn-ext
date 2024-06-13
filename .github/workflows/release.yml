@@ -1,0 +1,51 @@
+name: 'publish'
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  'build-and-release-ext':
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    
+    - name: Get npm package version
+      id: package_version
+      run: echo "::set-output name=VERSION::$(node -p "require('./package.json').version")"
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Project
+      run: npm run repack
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.package_version.outputs.VERSION }}
+        release_name: Release v${{ steps.package_version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/mslearn-ext-v${{ steps.package_version.outputs.VERSION }}.zip
+        asset_name: mslearn-ext-${{ steps.package_version.outputs.VERSION }}.zip
+        asset_content_type: application/zip
