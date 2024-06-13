@@ -24,6 +24,11 @@ Auto completes the whole path/module/unit in microsoft learn and waits for the g
 4. Refresh the page/tab
 5. The extension will auto complete the path and wait for the given time
 
+## Video Tutorial
+
+[![Mslearn AutoCompleter Video Tutorial](https://img.youtube.com/vi/-eQJ-dSHHAo/0.jpg)](https://www.youtube.com/watch?v=-eQJ-dSHHAo)
+
+
 
 ## Contribution
 
