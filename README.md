@@ -5,7 +5,7 @@ Auto completes the whole path/module/unit in microsoft learn and waits for the g
 ## Build and Install
 1. Clone the repository
 2. Run `npm install`
-4. change API_KEY in src/gemini.js (read the comments in the file to get the API_KEY)
+4. change *API_KEY* in `src/gemini.js` (read the comments in the file to get the API_KEY)
 3. Run `npm run build`
 4. Open Chrome and go to `chrome://extensions/`
 5. Enable Developer mode
